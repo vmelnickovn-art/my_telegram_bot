@@ -1,0 +1,8 @@
+meta:
+  environment: python
+  main: main.py
+build:
+  python:
+    version: 3.11 # Выберите нужную версию Python
+run:
+  web: python main.py
