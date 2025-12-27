@@ -5,8 +5,7 @@ from telebot import types
 
 # Убедитесь, что токен установлен в переменных окружения
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-if not TOKEN:
-    raise ValueError("Переменная окружения TELEGRAM_BOT_TOKEN не установлена.")
+
 
 bot = telebot.TeleBot(TOKEN)
 
