@@ -1,8 +1,9 @@
-meta:
-  environment: python
-  main: main.py
-build:
-  python:
-    version: 3.11 # Выберите нужную версию Python
-run:
-  web: python main.py
+    meta:
+      environment: python
+      main: mainn.py # Убедитесь, что это имя вашего основного файла
+    build:
+      python:
+        version: 3.0 # Или любая другая версия Python
+    run:
+      web: python mainn.py # Убедитесь, что это имя вашего основного файла
+    
