@@ -3,7 +3,7 @@
       main: mainn.py # Убедитесь, что это имя вашего основного файла
     build:
       python:
-        version: 3.0 # Или любая другая версия Python
+        version:  3.13.5 # Или любая другая версия Python
     run:
       web: python mainn.py # Убедитесь, что это имя вашего основного файла
     
