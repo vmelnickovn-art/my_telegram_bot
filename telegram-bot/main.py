@@ -1,14 +1,16 @@
-import os
 
+import os
 import telebot
 from telebot import types
 
-
+# Убедитесь, что токен установлен в переменных окружения
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-bot = telebot.TeleBot(TOKEN)
+if not TOKEN:
+    raise ValueError("Переменная окружения TELEGRAM_BOT_TOKEN не установлена.")
 
 bot = telebot.TeleBot(TOKEN)
 
+# --- Вопросы и ответы ---
 QA = {
     'about_what_is': {
         'question': 'Что такое ученическое самоуправление?',
@@ -27,24 +29,19 @@ QA = {
         )
     }
 }
+# ------------------------
 
 
 # Единый обработчик команды /start
 @bot.message_handler(commands=['start'])
 def start_command(message):
-
-
     markup_reply = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
     btn_about = types.KeyboardButton('О самоуправлении')
     btn_news = types.KeyboardButton('Новости')
     btn_site = types.KeyboardButton('Сайт')
-    markup_reply.add(btn_about, btn_news)  # Добавляем кнопки в один ряд
-    markup_reply.add(btn_site) # Добавляем кнопку "Сайт" в Reply-клавиатуру
+    markup_reply.add(btn_about, btn_news)
+    markup_reply.add(btn_site)
 
-    # Создаем Inline-клавиатуру для ссылки на сайт (появляется внутри сообщения)
-    # Эту Inline-кнопку вы отправляете сразу при старте, она ведет на сайт.
-    # Обратите внимание, что переменная `btn_site` здесь отличается от `btn_site_reply` выше,
-    # даже если они названы одинаково, это разные объекты
     markup_inline = types.InlineKeyboardMarkup()
     btn_site_start = types.InlineKeyboardButton('Перейти на сайт "Будь в движении"', url='https://www.youtube.com/')
     markup_inline.add(btn_site_start)
@@ -53,25 +50,26 @@ def start_command(message):
         message.chat.id,
         'Привет! Я бот самоуправления.\n\n'
         'Используй кнопки ниже для навигации или введи /help для подсказок.',
-        reply_markup=markup_reply  # Отправляем Reply-клавиатуру
+        reply_markup=markup_reply
     )
     bot.send_message(
         message.chat.id,
         'Ты также можешь перейти на наш официальный сайт:',
-        reply_markup=markup_inline  # Отправляем Inline-клавиатуру
+        reply_markup=markup_inline
     )
 
 
 # Обработчик команды /help
 @bot.message_handler(commands=['help'])
 def help_command(message):
-
     bot.send_message(
         message.chat.id,
         'Я могу помочь тебе с информацией о нашем самоуправлении. '
         'Используй кнопки в главном меню для доступа к разделам "О самоуправлении", "Новости", "Контакты".\n'
         'Чтобы узнать свой ID, просто напиши "мой id".'
     )
+
+# Обработчик для всех остальных текстовых сообщений
 @bot.message_handler(func=lambda message: True)
 def handle_text_messages(message):
     chat_id = message.chat.id
@@ -105,23 +103,8 @@ def handle_text_messages(message):
             'Мы - школьное самоуправление. Выберите интересующий вас вопрос:',
             reply_markup=markup_about
         )
+    # -----------------------------------------------------------------
 
-# Обработчик для всех остальных текстовых сообщений
-# func=lambda message: True означает, что этот обработчик будет вызван для любого текстового сообщения,
-# которое не было обработано предыдущими @bot.message_handler (например, командами или кнопками с точным текстом).
-@bot.message_handler(func=lambda message: True)
-def handle_text_messages(message):
-    chat_id = message.chat.id
-    user_text = message.text.lower()  # Переводим текст в нижний регистр для удобства сравнения
-
-
-    if user_text == 'мой id':
-        bot.send_message(chat_id, f'Твой ID: {message.from_user.id}')
-    elif user_text == 'о самоуправлении':
-        bot.send_message(
-            chat_id,
-            'Мы - школьное самоуправление.'
-        )
     elif user_text == 'новости':
         bot.send_message(
             chat_id,
@@ -129,33 +112,49 @@ def handle_text_messages(message):
             '- 16 декабря: школьный форум \n'
             '- 22 декабря: конкурс талантов \n'
             'Следите за обновлениями на нашем сайте и в социальных сетях!',
-            parse_mode='Markdown'  # Используем Markdown для жирного текста
+            parse_mode='Markdown'
         )
-    # --- НОВЫЙ ОБРАБОТЧИК ДЛЯ КНОПКИ "САЙТ" ИЗ REPLY-КЛАВИАТУРЫ ---
     elif user_text == 'сайт':
-
-        # Создаем Inline-клавиатуру специально для этой цели
-        markup_inline_for_site_button = types.InlineKeyboardMarkup()# Делает чтобы работали и кнопка сайт и текст
-        # Добавляем Inline-кнопку с прямой ссылкой
+        markup_inline_for_site_button = types.InlineKeyboardMarkup()
         btn_link_to_site = types.InlineKeyboardButton('Перейти на наш сайт', url='https://www.youtube.com/')
         markup_inline_for_site_button.add(btn_link_to_site)
 
         bot.send_message(
             chat_id,
             'Нажмите кнопку ниже, чтобы перейти на наш официальный сайт:',
-            reply_markup=markup_inline_for_site_button # Отправляем сообщение с Inline-кнопкой
+            reply_markup=markup_inline_for_site_button
         )
-    # --- КОНЕЦ НОВОГО ОБРАБОТЧИКА ---
     else:
-        # Если ни одно из предыдущих условий не сработало, бот отвечает, что не понял команду
         bot.send_message(chat_id, 'Извини, я тебя не понял. Пожалуйста, используй кнопки или команды /start, /help.')
 
 
+# --- НОВЫЙ ОБРАБОТЧИК ДЛЯ INLINE-КНОПОК (Callback Query) ---
+@bot.callback_query_handler(func=lambda call: call.data in QA)
+def callback_inline_questions(call):
+    try:
+        # Получаем данные, которые мы передали в callback_data (например, 'about_what_is')
+        key = call.data
+        
+        # Получаем ответ из словаря QA
+        response = f"*{QA[key]['question']}*\n\n{QA[key]['answer']}"
+        
+        # Отправляем ответ пользователю
+        bot.send_message(
+            call.message.chat.id, 
+            response, 
+            parse_mode='Markdown'
+        )
+        
+        # Обязательно подтверждаем обработку запроса, чтобы убрать "часики" с кнопки
+        bot.answer_callback_query(call.id)
+        
+    except Exception as e:
+        print(f"Ошибка при обработке callback_query: {e}")
+        bot.answer_callback_query(call.id, "Произошла ошибка при получении информации.")
+
+
 # --- Запуск бота ---
-if __name__ == '__main__': # Исправлено: __name__
-
-    # bot.polling() запускает бесконечный цикл получения обновлений
-    # none_stop=True делает так, чтобы бот не останавливался при возникновении ошибок, а продолжал работать
-
+if __name__ == '__main__':
+    print("Бот запущен...")
     bot.polling(none_stop=True)
 
