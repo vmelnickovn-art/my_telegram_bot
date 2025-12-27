@@ -55,6 +55,39 @@ def help_command(message):
         'Используй кнопки в главном меню для доступа к разделам "О самоуправлении", "Новости", "Контакты".\n'
         'Чтобы узнать свой ID, просто напиши "мой id".'
     )
+@bot.message_handler(func=lambda message: True)
+def handle_text_messages(message):
+    chat_id = message.chat.id
+    user_text = message.text.lower()
+
+    if user_text == 'мой id':
+        bot.send_message(chat_id, f'Твой ID: {message.from_user.id}')
+
+    # --- ОБНОВЛЕННЫЙ ОБРАБОТЧИК ДЛЯ КНОПКИ "О САМОУПРАВЛЕНИИ" ---
+    elif user_text == 'о самоуправлении':
+        # Создаем Inline-клавиатуру с вопросами
+        markup_about = types.InlineKeyboardMarkup()
+        
+        # Кнопка 1: Что такое ученическое самоуправление?
+        btn_what_is = types.InlineKeyboardButton(
+            QA['about_what_is']['question'], 
+            callback_data='about_what_is' # Используем ключ из словаря QA
+        )
+        
+        # Кнопка 2: Как стать членом органов ученического самоуправления?
+        btn_how_to_join = types.InlineKeyboardButton(
+            QA['about_how_to_join']['question'], 
+            callback_data='about_how_to_join' # Используем ключ из словаря QA
+        )
+        
+        markup_about.add(btn_what_is)
+        markup_about.add(btn_how_to_join)
+
+        bot.send_message(
+            chat_id,
+            'Мы - школьное самоуправление. Выберите интересующий вас вопрос:',
+            reply_markup=markup_about
+        )
 
 # Обработчик для всех остальных текстовых сообщений
 # func=lambda message: True означает, что этот обработчик будет вызван для любого текстового сообщения,
@@ -106,4 +139,5 @@ if __name__ == '__main__': # Исправлено: __name__
 
     # bot.polling() запускает бесконечный цикл получения обновлений
     # none_stop=True делает так, чтобы бот не останавливался при возникновении ошибок, а продолжал работать
+
     bot.polling(none_stop=True)
